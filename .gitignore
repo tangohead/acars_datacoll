@@ -1,0 +1,4 @@
+*.pyc
+acars-data/
+acars-data-old/
+logs/
