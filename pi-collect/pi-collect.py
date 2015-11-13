@@ -100,8 +100,11 @@ try:
 
         # Add the DB name to the log
         f = open(config.logging_dir + "/" + "new_updates.log", "w")
-        f.write(db_filename)
+        f.write(db_filename + "\n")
         f.close()
+
+        #Give the decoder etc chance to stop?
+        time.sleep(2)
 except KeyboardInterrupt:
     if isinstance(acars_decoder, ACARSDecoderHandler):
         acars_decoder.stop()
