@@ -25,4 +25,4 @@ class ACARSDecoderHandler(Thread):
         self.barrier.wait()
         while not self.stop_flag:
             time.sleep(1)
-        dec_proc.terminate()
+        dec_proc.kill()

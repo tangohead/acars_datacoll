@@ -27,4 +27,4 @@ class ACARSServerHandler(Thread):
             srv_proc = subprocess.Popen([config.acars_srv_dir + "/" + "./acarsserv", "-N", self.server_location, "-b", self.db_path, "-a", "-s", "-d"], stdout=logfile, stderr=logfile)
             while not self.stop_flag:
                 time.sleep(1)
-            srv_proc.terminate()
+            srv_proc.kill()
