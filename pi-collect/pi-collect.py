@@ -167,9 +167,9 @@ try:
         cur.execute("SELECT * FROM main.Messages")
         print(cur.fetchone())
 
-        con.close()
-        cur.close()
 
+        cur.close()
+        con.close()
         # Add the DB name to the log
         f = open(config.logging_dir + "/" + "new_updates.log", "w")
         f.write(db_filename + "\n")
