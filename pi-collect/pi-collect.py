@@ -157,10 +157,13 @@ try:
         cur.execute("INSERT INTO MASTER.Messages SELECT * FROM main.Messages")
         cur.execute("INSERT INTO MASTER.Flights SELECT * FROM main.Flights WHERE NOT EXISTS(SELECT 1 FROM MASTER.Flights WHERE main.Flights.FlightID = MASTER.Flights.FlightID)")
         cur.execute("DETACH DATABASE 'MASTER'")
-
-
+        print("PRE")
+        cur.execute("SELECT * FROM main.Messages")
+        print(cur.fetchone())
         cur.execute("DELETE FROM Messages")
-
+        print("POST")
+        cur.execute("SELECT * FROM main.Messages")
+        print(cur.fetchone())
 
         # Add the DB name to the log
         f = open(config.logging_dir + "/" + "new_updates.log", "w")
