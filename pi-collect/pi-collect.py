@@ -4,6 +4,8 @@ import config
 import random
 import time
 import threading
+import shutil
+import sqlite3
 from ACARSDecoderHandler import ACARSDecoderHandler
 from ACARSServerHandler import ACARSServerHandler
 import pprint
@@ -76,13 +78,14 @@ debug_print("Decoder logging at " + dec_log)
 #Init barrier to force bootup in the correct order (decoder then server)
 acars_decoder = 0
 acars_server = 0
-
+#We don't want this to change between runs
+current_filename_base = (datetime.now()).strftime("%Y%m%d-%H%M%S") + "-acars"
+db_filename = config.db_storage_dir + "/" + current_filename_base + ".sqb"
 try:
     while 1:
-        current_filename_base = (datetime.now()).strftime("%Y%m%d-%H%M%S") + "-acars"
-        db_filename = config.db_storage_dir + "/" + current_filename_base + ".sqb"
-        srv_log = config.logging_dir + "/" + current_filename_base + "-srv.log"
-        dec_log = config.logging_dir + "/" + current_filename_base + "-dec.log"
+        logging_filename_base = (datetime.now()).strftime("%Y%m%d-%H%M%S") + "-acars"
+        srv_log = config.logging_dir + "/" + logging_filename_base + "-srv.log"
+        dec_log = config.logging_dir + "/" + logging_filename_base + "-dec.log"
 
         # Boot up the ACARS decoder
         acars_decoder = ACARSDecoderHandler("127.0.0.1:5555", "0", ["131.525", "131.725", "131.850"], dec_log, barrier)
@@ -98,13 +101,25 @@ try:
         acars_server.stop()
         acars_decoder.stop()
 
+        #Give the decoder etc chance to stop?
+        time.sleep(2)
+
+        #Take a copy of the database
+        copy_db_filename = config.db_storage_dir + "/" + logging_filename_base + "-acars.sqb"
+        shutil.copyfile(db_filename, copy_db_filename)
+
+        #Now we access the DB and empty the messages table
+        con = sqlite3.connect(db_filename)
+        cur = con.cursor()
+        cur.execute("DELETE FROM Messages;")
+
+
         # Add the DB name to the log
         f = open(config.logging_dir + "/" + "new_updates.log", "w")
         f.write(db_filename + "\n")
         f.close()
 
-        #Give the decoder etc chance to stop?
-        time.sleep(2)
+
 except KeyboardInterrupt:
     if isinstance(acars_decoder, ACARSDecoderHandler):
         acars_decoder.stop()
