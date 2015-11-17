@@ -55,7 +55,7 @@ if not os.access(config.logging_dir, os.R_OK or os.W_OK):
 storage_dir_contents = os.listdir(config.db_storage_dir)
 
 for i in storage_dir_contents:
-    if not os.path.isdir(config.db_storage_dir + "/" + i):
+    if not os.path.isdir(config.db_storage_dir + "/" + i) or i != config.master_db_name:
         try:
             shutil.move(config.db_storage_dir + "/" + i, config.old_storage_dir)
         except IOError as e:
