@@ -141,8 +141,8 @@ try:
 
         #First we attatch the master DB and copy the messages and new flights to it
         cur.execute("ATTACH DATABASE (?) AS (?)", (master_db_filename, "MASTER"))
-        cur.execute("INSERT INTO MASTER.Messages SELECT * FROM Messages")
-        cur.execute("INSERT INTO MASTER.Flights SELECT * FROM Flights WHERE NOT EXISTS(SELECT 1 FROM MASTER.Flights WHERE Flights.FlightID = MASTER.Flights.FlightID)")
+        cur.execute("INSERT INTO MASTER.Messages SELECT * FROM main.Messages")
+        cur.execute("INSERT INTO MASTER.Flights SELECT * FROM Flights WHERE NOT EXISTS(SELECT 1 FROM MASTER.Flights WHERE main.Flights.FlightID = MASTER.Flights.FlightID)")
         cur.execute("DETACH DATABASE 'MASTER'")
 
 
