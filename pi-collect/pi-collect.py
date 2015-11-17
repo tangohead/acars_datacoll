@@ -51,11 +51,21 @@ if not os.access(config.logging_dir, os.R_OK or os.W_OK):
         print(err.strerror)
         exit()
 
+#Check for the master db directory exists
+if not os.access(config.master_dir, os.R_OK or os.W_OK):
+    try:
+        os.mkdir(config.master_dir)
+    except OSError as err:
+        print("Could not create the logging directory at " + config.master_dir)
+        print(err.strerror)
+        exit()
+
+
 #Then check if we have any 'leftover' databases around, and move them if so
 storage_dir_contents = os.listdir(config.db_storage_dir)
 
 for i in storage_dir_contents:
-    if not os.path.isdir(config.db_storage_dir + "/" + i) or i != config.master_db_name:
+    if not os.path.isdir(config.db_storage_dir + "/" + i):
         try:
             shutil.move(config.db_storage_dir + "/" + i, config.old_storage_dir)
         except IOError as e:
@@ -82,7 +92,7 @@ acars_server = 0
 #We don't want this to change between runs
 current_filename_base = (datetime.now()).strftime("%Y%m%d-%H%M%S") + "-acars"
 db_filename = config.db_storage_dir + "/" + current_filename_base + ".sqb"
-master_db_filename = config.db_storage_dir + "/" + config.master_db_name
+master_db_filename = config.master_dir + "/" + config.master_db_name
 
 #We do need to init the master DB if it isn't already
 master_con = sqlite3.connect(master_db_filename)
