@@ -107,6 +107,19 @@ master_cursor.executescript(schema)
 master_cursor.close()
 master_con.close()
 
+#We're also going to create the database to jam stuff into, so we can control its schema
+temp_store_con = sqlite3.connect(db_filename)
+temp_store_cursor = temp_store_con.cursor()
+
+#Load the schema
+schema_file = open(config.master_db_schema_path, "r")
+schema = schema_file.read()
+schema_file.close()
+
+temp_store_cursor.executescript(schema)
+temp_store_cursor.close()
+temp_store_con.close()
+
 try:
     while 1:
         logging_filename_base = (datetime.now()).strftime("%Y%m%d-%H%M%S") + "-acars"
