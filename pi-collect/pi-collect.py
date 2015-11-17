@@ -153,9 +153,7 @@ try:
         cur = con.cursor()
 
         #First we attatch the master DB and copy the messages and new flights to it
-        print("PRE")
-        cur.execute("SELECT * FROM main.Messages")
-        print(cur.fetchall())
+
 
         cur.execute("ATTACH DATABASE (?) AS (?)", (master_db_filename, "MASTER"))
         cur.execute("INSERT INTO MASTER.Messages SELECT * FROM main.Messages")
@@ -163,9 +161,7 @@ try:
         cur.execute("DETACH DATABASE 'MASTER'")
 
         cur.execute("DELETE FROM Messages")
-        print("POST")
-        cur.execute("SELECT * FROM main.Messages")
-        print(cur.fetchall())
+
 
 
         cur.close()
