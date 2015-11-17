@@ -169,7 +169,7 @@ try:
 
 
         cur.close()
-        conn.commit()
+        con.commit()
         con.close()
         # Add the DB name to the log
         f = open(config.logging_dir + "/" + "new_updates.log", "w")
