@@ -16,7 +16,7 @@ if not os.access(local_config.db_storage_dir, os.R_OK or os.W_OK):
     try:
         os.mkdir(local_config.db_storage_dir)
     except OSError as err:
-        print("Could not create the storage directory at " + config.db_storage_dir)
+        print("Could not create the storage directory at " + local_config.db_storage_dir)
         print(err.strerror)
         exit()
 

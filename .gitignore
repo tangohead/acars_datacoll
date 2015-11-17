@@ -7,3 +7,4 @@ local_config.py
 remote_config.py
 *.log
 separated_dbs/
+master_db/
