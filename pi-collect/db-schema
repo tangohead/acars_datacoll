@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS Flights (FlightID integer primary key,  Registration char(7) ,  FlightNumber char(6),  StartTime datetime,  LastTime datetime, NbMessages integer);
+CREATE INDEX IF NOT EXISTS FlightsFlightNumber on Flights(FlightNumber);
+CREATE INDEX IF NOT EXISTS FlightsRegistration on Flights(Registration);
+CREATE TABLE IF NOT EXISTS Messages (MessageID integer primary key, FlightID integer not null , Time datetime, StID integer, Channel integer , Error integer, SignalLvl integer, Mode char , Ack char , Label char(2), BlockNo char , MessNo char(4) , Txt varchar(250));
+CREATE TABLE IF NOT EXISTS Stations (StID integer primary key, IdStation varchar(250), IpAddr varchar(250));

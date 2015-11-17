@@ -78,9 +78,25 @@ debug_print("Decoder logging at " + dec_log)
 #Init barrier to force bootup in the correct order (decoder then server)
 acars_decoder = 0
 acars_server = 0
+
 #We don't want this to change between runs
 current_filename_base = (datetime.now()).strftime("%Y%m%d-%H%M%S") + "-acars"
 db_filename = config.db_storage_dir + "/" + current_filename_base + ".sqb"
+master_db_filename = config.db_storage_dir + "/" + config.master_db_filename
+
+#We do need to init the master DB if it isn't already
+master_con = sqlite3.connect(master_db_filename)
+master_cursor = master_con.cursor()
+
+#Load the schema
+schema_file = open(local_config.master_db_schema_path, "r")
+schema = schema_file.read()
+schema_file.close()
+
+master_cursor.executescript(schema)
+master_cursor.close()
+master_con.close()
+
 try:
     while 1:
         logging_filename_base = (datetime.now()).strftime("%Y%m%d-%H%M%S") + "-acars"
@@ -105,13 +121,22 @@ try:
         time.sleep(2)
 
         #Take a copy of the database
+        #This is mostly a 'just in case'
         copy_db_filename = config.db_storage_dir + "/" + logging_filename_base + "-acars.sqb"
         shutil.copyfile(db_filename, copy_db_filename)
 
         #Now we access the DB and empty the messages table
         con = sqlite3.connect(db_filename)
         cur = con.cursor()
-        cur.execute("DELETE FROM Messages;")
+
+        #First we attatch the master DB and copy the messages and new flights to it
+        cur.execute("ATTACH DATABASE (?) AS (?)", (master_db_filename, "MASTER"))
+        cur.execute("INSERT INTO MASTER.Messages SELECT * FROM Messages")
+        cur.execute("INSERT INTO MASTER.Flights SELECT * FROM Flights WHERE NOT EXISTS(SELECT 1 FROM MASTER.Flights WHERE Flights.FlightID = MASTER.Flights.FlightID)")
+        cur.execute("DETACH DATABASE 'MASTER'")
+
+
+        #cur.execute("DELETE FROM Messages;")
 
 
         # Add the DB name to the log

@@ -3,3 +3,7 @@ acars-data/
 acars-data-old/
 logs/
 config.py
+master_db/
+*.log
+*config.py
+separated_dbs/
