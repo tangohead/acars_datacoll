@@ -153,17 +153,15 @@ try:
         cur = con.cursor()
 
         #First we attatch the master DB and copy the messages and new flights to it
-
-
         cur.execute("ATTACH DATABASE (?) AS (?)", (master_db_filename, "MASTER"))
         cur.execute("INSERT INTO MASTER.Messages SELECT * FROM main.Messages")
+        #This only copies flights we haven't seen before
         cur.execute("INSERT INTO MASTER.Flights SELECT * FROM main.Flights WHERE NOT EXISTS(SELECT 1 FROM MASTER.Flights WHERE main.Flights.FlightID = MASTER.Flights.FlightID)")
+        #Detach the master and delete the messages from the 'temporary' DB
         cur.execute("DETACH DATABASE 'MASTER'")
-
         cur.execute("DELETE FROM Messages")
 
-
-
+        #Close and commit the changes
         cur.close()
         con.commit()
         con.close()
