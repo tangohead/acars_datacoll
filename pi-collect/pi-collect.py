@@ -156,7 +156,7 @@ try:
         print("PRE")
         cur.execute("SELECT * FROM main.Messages")
         print(cur.fetchone())
-        
+
         cur.execute("ATTACH DATABASE (?) AS (?)", (master_db_filename, "MASTER"))
         cur.execute("INSERT INTO MASTER.Messages SELECT * FROM main.Messages")
         cur.execute("INSERT INTO MASTER.Flights SELECT * FROM main.Flights WHERE NOT EXISTS(SELECT 1 FROM MASTER.Flights WHERE main.Flights.FlightID = MASTER.Flights.FlightID)")
@@ -166,6 +166,9 @@ try:
         print("POST")
         cur.execute("SELECT * FROM main.Messages")
         print(cur.fetchone())
+
+        con.close()
+        cur.close()
 
         # Add the DB name to the log
         f = open(config.logging_dir + "/" + "new_updates.log", "w")
