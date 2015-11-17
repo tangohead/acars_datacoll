@@ -3,8 +3,7 @@ acars-data/
 acars-data-old/
 logs/
 config.py
-local_config.py
-remote_config.py
+*config.py
 *.log
 separated_dbs/
 master_db/
