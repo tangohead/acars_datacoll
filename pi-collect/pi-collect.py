@@ -89,7 +89,7 @@ master_con = sqlite3.connect(master_db_filename)
 master_cursor = master_con.cursor()
 
 #Load the schema
-schema_file = open(local_config.master_db_schema_path, "r")
+schema_file = open(config.master_db_schema_path, "r")
 schema = schema_file.read()
 schema_file.close()
 
