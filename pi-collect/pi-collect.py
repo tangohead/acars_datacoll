@@ -82,7 +82,7 @@ acars_server = 0
 #We don't want this to change between runs
 current_filename_base = (datetime.now()).strftime("%Y%m%d-%H%M%S") + "-acars"
 db_filename = config.db_storage_dir + "/" + current_filename_base + ".sqb"
-master_db_filename = config.db_storage_dir + "/" + config.master_db_filename
+master_db_filename = config.db_storage_dir + "/" + config.master_db_name
 
 #We do need to init the master DB if it isn't already
 master_con = sqlite3.connect(master_db_filename)
