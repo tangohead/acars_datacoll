@@ -145,7 +145,7 @@ try:
 
         #Take a copy of the database
         #This is mostly a 'just in case'
-        copy_db_filename = config.db_storage_dir + "/" + logging_filename_base + "-acars.sqb"
+        copy_db_filename = config.db_storage_dir + "/" + logging_filename_base + "-backup.sqb"
         shutil.copyfile(db_filename, copy_db_filename)
 
         #Now we access the DB and empty the messages table
@@ -159,7 +159,7 @@ try:
         cur.execute("DETACH DATABASE 'MASTER'")
 
 
-        #cur.execute("DELETE FROM Messages;")
+        cur.execute("DELETE FROM Messages")
 
 
         # Add the DB name to the log
