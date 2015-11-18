@@ -9,6 +9,8 @@ import sqlite3
 from ACARSDecoderHandler import ACARSDecoderHandler
 from ACARSServerHandler import ACARSServerHandler
 import pprint
+#for pattern matching filenames
+import fnmatch
 
 #For running shell commands
 from subprocess import call
@@ -65,7 +67,7 @@ if not os.access(config.master_dir, os.R_OK or os.W_OK):
 storage_dir_contents = os.listdir(config.db_storage_dir)
 
 for i in storage_dir_contents:
-    if not os.path.isdir(config.db_storage_dir + "/" + i):
+    if not os.path.isdir(config.db_storage_dir + "/" + i) and fnmatch.fnmatch(i, '*-acars-backup.sqb'):
         try:
             shutil.move(config.db_storage_dir + "/" + i, config.old_storage_dir)
         except IOError as e:
@@ -91,34 +93,60 @@ acars_server = 0
 
 #We don't want this to change between runs
 current_filename_base = (datetime.now()).strftime("%Y%m%d-%H%M%S") + "-acars"
-db_filename = config.db_storage_dir + "/" + current_filename_base + ".sqb"
+db_filename = None
+config.db_storage_dir + "/" + current_filename_base + ".sqb"
 master_db_filename = config.master_dir + "/" + config.master_db_name
 
-#We do need to init the master DB if it isn't already
-master_con = sqlite3.connect(master_db_filename)
-master_cursor = master_con.cursor()
+#Check if the master is there already
+if not os.path.isfile(master_db_filename):
+    #We do need to init the master DB if it isn't already
+    master_con = sqlite3.connect(master_db_filename)
+    master_cursor = master_con.cursor()
 
-#Load the schema
-schema_file = open(config.master_db_schema_path, "r")
-schema = schema_file.read()
-schema_file.close()
+    #Load the schema
+    schema_file = open(config.master_db_schema_path, "r")
+    schema = schema_file.read()
+    schema_file.close()
 
-master_cursor.executescript(schema)
-master_cursor.close()
-master_con.close()
+    master_cursor.executescript(schema)
+    master_cursor.close()
+    master_con.close()
 
-#We're also going to create the database to jam stuff into, so we can control its schema
-temp_store_con = sqlite3.connect(db_filename)
-temp_store_cursor = temp_store_con.cursor()
+#Now we want to check if there's a 'temporary' DB we can use already
+for f in os.listdir(config.db_storage_dir):
+    if fnmatch.fnmatch(f, '*-acars.sqb'):
+        db_filename = config.db_storage_dir + "/" + f
 
-#Load the schema
-schema_file = open(config.master_db_schema_path, "r")
-schema = schema_file.read()
-schema_file.close()
+#If we don't have a file to use then set one up
+if db_filename == None:
+    db_filename = config.db_storage_dir + "/" + current_filename_base + ".sqb"
 
-temp_store_cursor.executescript(schema)
-temp_store_cursor.close()
-temp_store_con.close()
+    #We're now going to try and take a copy of the master database
+    if os.path.isfile(master_db_filename):
+        shutil.copy(master_db_filename, db_filename)
+
+        #Then empty out the messages table
+        temp_store_con = sqlite3.connect(db_filename)
+        temp_store_cursor = temp_store_con.cursor()
+        temp_store_cursor.execute("DELETE FROM Messages")
+        temp_store_cursor.close()
+        temp_store_con.commit()
+        temp_store_con.close()
+
+    else:
+        #Otherwise we need to set up the database
+        temp_store_con = sqlite3.connect(db_filename)
+        temp_store_cursor = temp_store_con.cursor()
+
+        #Load the schema
+        schema_file = open(config.master_db_schema_path, "r")
+        schema = schema_file.read()
+        schema_file.close()
+
+        temp_store_cursor.executescript(schema)
+        temp_store_cursor.close()
+        temp_store_con.commit()
+        temp_store_con.close()
 
 try:
     while 1:
